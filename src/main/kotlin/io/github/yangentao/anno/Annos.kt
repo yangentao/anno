@@ -6,6 +6,9 @@ import kotlin.reflect.*
 import kotlin.reflect.full.findAnnotation
 import kotlin.reflect.full.hasAnnotation
 
+/**
+ * Serialize this field/property, for json
+ */
 @Target(AnnotationTarget.FIELD, AnnotationTarget.PROPERTY)
 @Retention(AnnotationRetention.RUNTIME)
 annotation class SerialMe()
@@ -14,18 +17,26 @@ annotation class SerialMe()
 @Retention(AnnotationRetention.RUNTIME)
 annotation class TempValue(val desc: String = "")
 
+/**
+ * for proguard
+ */
 @Target(AnnotationTarget.CLASS, AnnotationTarget.CONSTRUCTOR, AnnotationTarget.FUNCTION, AnnotationTarget.PROPERTY, AnnotationTarget.FIELD)
 @Retention(AnnotationRetention.RUNTIME)
 annotation class KeepMe
 
-//对于List/Array/Set, 只使用list:Char
-//对于map, 先用list:Char分割出entries, 再用map:Char分割Key和Value
+/**
+ * 对于List/Array/Set, 只使用list:Char
+ * 对于map, 先用list:Char分割出entries, 再用map:Char分割Key和Value
+ */
+
 @Target(AnnotationTarget.PROPERTY, AnnotationTarget.FIELD, AnnotationTarget.VALUE_PARAMETER)
 @Retention(AnnotationRetention.RUNTIME)
 annotation class SepChar(val list: Char = ',', val map: Char = ':')
 
-//	@OptionList("0:男", "1:女")
-//	@OptionList("男", "女")
+/**
+ * 	@OptionList("0:男", "1:女")
+ * 	@OptionList("男", "女")
+ */
 @Target(AnnotationTarget.PROPERTY, AnnotationTarget.FIELD, AnnotationTarget.VALUE_PARAMETER)
 @Retention(AnnotationRetention.RUNTIME)
 annotation class OptionList(vararg val options: String, val bits: Boolean = false)
@@ -35,23 +46,31 @@ fun OptionList.verify(textSet: Set<String>): Boolean {
     return optSet.containsAll(textSet)
 }
 
-// DecimalFormat
+/**
+ *  DecimalFormat("#.00")
+ */
 @Target(AnnotationTarget.PROPERTY, AnnotationTarget.FIELD, AnnotationTarget.VALUE_PARAMETER)
 @Retention(AnnotationRetention.RUNTIME)
 annotation class NumberPattern(val pattern: String)
 
-//String.format
+/**
+ * String.format
+ */
 @Target(AnnotationTarget.PROPERTY, AnnotationTarget.FIELD, AnnotationTarget.VALUE_PARAMETER)
 @Retention(AnnotationRetention.RUNTIME)
 annotation class StringFormat(val pattern: String)
 
-//java.util.Date
+/**
+ * java.util.Date
+ */
 @Target(AnnotationTarget.PROPERTY, AnnotationTarget.FIELD, AnnotationTarget.VALUE_PARAMETER)
 @Retention(AnnotationRetention.RUNTIME)
 annotation class DatePattern(val format: String)
 
-//fixed > 0时, min和max无效
-//fixed = 0时, min和max有效
+/**
+ * fixed > 0时, min和max无效
+ * fixed = 0时, min和max有效
+ */
 @Target(AnnotationTarget.PROPERTY, AnnotationTarget.FIELD, AnnotationTarget.VALUE_PARAMETER)
 @Retention(AnnotationRetention.RUNTIME)
 annotation class Length(val max: Long = 255, val min: Long = 0, val fixed: Long = 0)
@@ -64,15 +83,19 @@ fun Length.verify(value: Long): Boolean {
     return true
 }
 
-//是否忽略
+/**
+ * exclude this field/property, when serialize to json
+ */
 @Target(AnnotationTarget.PROPERTY, AnnotationTarget.FIELD, AnnotationTarget.FUNCTION)
 @Retention(AnnotationRetention.RUNTIME)
 annotation class Exclude
 
 val KProperty<*>.excluded: Boolean get() = this.hasAnnotation<Exclude>()
 
-//表或字段(属性)的名字
-//路由时, controller名字或action名字
+/**
+ * 表或字段(属性)的名字, for json/orm
+ * 路由时, controller名字或action名字
+ */
 @Target(
     AnnotationTarget.CLASS,
     AnnotationTarget.PROPERTY,
@@ -99,7 +122,9 @@ annotation class NullValue(val value: String)
 @Retention(AnnotationRetention.RUNTIME)
 annotation class Hidden
 
-//字符串长度限制, 也可用于数组或JsonArray
+/**
+ * Trim parameter
+ */
 @Target(
     AnnotationTarget.PROPERTY,
     AnnotationTarget.FIELD,
@@ -133,12 +158,16 @@ fun RangeLong.verify(value: Long): Boolean {
     return value in min..max
 }
 
-//字符串非空, 也可以用于集合
+/**
+ * 字符串非空, 也可以用于集合
+ */
 @Target(AnnotationTarget.PROPERTY, AnnotationTarget.FIELD, AnnotationTarget.VALUE_PARAMETER)
 @Retention(AnnotationRetention.RUNTIME)
 annotation class NotEmpty(val trim: Boolean = true)
 
-//字符串长度限制, 也可用于数组或JsonArray
+/**
+ * 字符串长度限制, 也可用于数组或JsonArray
+ */
 @Target(
     AnnotationTarget.PROPERTY,
     AnnotationTarget.FIELD,
@@ -212,8 +241,9 @@ val KParameter.userLabel: String
         return this.findAnnotation<Label>()?.value ?: this.userName
     }
 
-//==default value
-
+/**
+ * hidden for client, when serialize to json
+ */
 val KProperty<*>.isHidden: Boolean
     get() {
         return this.hasAnnotation<Hidden>()
@@ -224,12 +254,13 @@ val KAnnotatedElement.labelOnly: String?
         return this.findAnnotation<Label>()?.value
     }
 //inline fun <reified T : Annotation> KAnnotatedElement.hasAnnotation(): Boolean = null != this.findAnnotation<T>()
-
-//fun main() {
-//	val fm = DecimalFormat("#.###")
-//	println(fm.maximumFractionDigits)
-//}
-
+/**
+ * fun main() {
+ * 	val fm = DecimalFormat("#.###")
+ * 	println(fm.maximumFractionDigits)
+ * }
+ *
+ */
 fun OptionList.toMap(): Map<String, String> {
     val map = LinkedHashMap<String, String>()
     this.options.map {
