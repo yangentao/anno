@@ -56,36 +56,8 @@ mavenPublishing {
         configPom(this, artifactName, descLib, githubLib)
     }
 }
-//
 afterEvaluate {
-//    val sourcesJar = task<Jar>("sourcesJar") {
-//        from(sourceSets["main"].allSource)
-//        archiveClassifier.set("sources")
-//    }
-
-    val dokkaJar = task<Jar>("dokkaJar") {
-        from(tasks.dokkaHtml)
-        group = JavaBasePlugin.DOCUMENTATION_GROUP
-        archiveClassifier.set("javadoc")
-    }
     publishing {
-        publications {
-            create<MavenPublication>("800") {
-
-                version = project.version.toString()
-                groupId = project.group.toString()
-                artifactId = artifactName
-
-                from(components["java"])
-                artifact(dokkaJar)
-//                artifact(tasks["sourcesJar"]) //mavenPublishing 已经包含了
-
-                pom {
-                    configPom(this, artifactName, descLib, githubLib)
-                }
-            }
-
-        }
         repositories {
             mavenLocal()
             maven {
@@ -98,10 +70,6 @@ afterEvaluate {
             }
         }
     }
-//    signing {
-//        sign(configurations.archives.get())
-//        sign(publishing.publications.mavenJava)
-//    }
 }
 
 
